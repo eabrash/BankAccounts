@@ -18,6 +18,8 @@ module Bank
 
       linker = CSV.read(csv_file)
 
+      # Associate account ID with owner and vice versa
+
       linker.each do |link|
           target_account = Bank::Account.find(Integer(link[0]))
           target_owner = Bank::Owner.find(Integer(link[1]))
@@ -29,6 +31,8 @@ module Bank
 
   end
 
+  # Class representing an account owner.
+
   class Owner
 
     attr_reader :id, :name, :address, :account_IDs
@@ -36,10 +40,9 @@ module Bank
     # The owner hash contains two smaller hashes. The hash accessed by :name
     # has sub-keys :first, :middle, and :last. The hash accessed by :address
     # has sub-keys :street1, :street2, :city, :state, :country, and :zip. Not
-    # every field will be provided for every owner. The birthdate is just a
-    # single Time object.
+    # every field will be provided for every owner.
 
-    @@all_owners = []
+    @@all_owners = []   # Class variable - array of all owners
 
     def initialize(owner_hash)
       @id = owner_hash[:id]
@@ -66,7 +69,7 @@ module Bank
       return @@all_owners
     end
 
-    # Find the owner that matches the given ID
+    # Find the Owner object that matches the given ID
 
     def self.find (desired_ID)
 
@@ -82,7 +85,8 @@ module Bank
 
     end
 
-    # Associate the provided account ID with this owner
+    # Associate the provided account ID with this owner. This is an array
+    # because the same owner could have multiple accounts.
 
     def add_account(account_ID)
       if @account_IDs[0] == nil
@@ -100,7 +104,7 @@ module Bank
 
   end
 
-  # Information about a bank account. Provides methods to allow transactions.
+  # Class representing a bank account. Provides methods to allow transactions.
 
   class Account
 
@@ -108,7 +112,9 @@ module Bank
 
     @@all_accounts = []
 
-    # Initialize account with user input
+    # Initialize account with account data input. An owner can optionally be provided
+    # upon initialization, but this functionality is not used in the current version of
+    # the program.
 
     def initialize(account_ID, account_initial_balance, date_of_creation, account_owner = nil)
 
@@ -116,7 +122,7 @@ module Bank
       @owners = [account_owner]
       @creation_date = date_of_creation
 
-      # Negative balance is a no-go
+      # Negative starting balance produces an error
 
       if account_initial_balance >= 0
         @balance = Float(account_initial_balance)
@@ -125,6 +131,10 @@ module Bank
       end
 
     end
+
+    # Read in information from a CSV and store it in the @@all_accounts class
+    # variable. Money is currently stored as a Float in dollars, not as an
+    # integer representing total number of cents.
 
     def self.read_accounts(csv_file)
 
@@ -195,45 +205,11 @@ module Bank
       end
     end
 
-    # def list_owners
-    #
-    #   owner_list = ""
-    #
-    #   if has_owner
-    #
-    #     counter = 1
-    #
-    #     @owners.each do |owner|
-    #       owner_list = owner_list + "#{owner.name[:first]} #{owner.name[:middle]} #{owner.name[:last]}\n"
-    #       counter += 1
-    #     end
-    #
-    #   else
-    #
-    #     owner_list = "This account has no owner."
-    #
-    #   end
-    #
-    #   return owner_list
-    #
-    # end
+    # String description of account's basic properties.
 
     def to_s
       return "ID: " + @id.to_s + ", Balance: $%.2f" % @balance + ", Date of creation: " + @creation_date.to_s
     end
-
-    private
-
-        # Check if the account has an owner
-
-    def has_owner
-      if @owners[0] != nil
-        return true
-      else
-        return false
-      end
-    end
-
 
   end
 
@@ -274,302 +250,10 @@ Bank::AccountLinker.read_account_owner_associations("./support/account_owners.cs
 #   puts "\n\n"
 # end
 
-stored_accounts = Bank::Account.all
-
-stored_accounts.each do |account|
-  puts account
-  owner = Bank::Owner.find(account.owners[0])
-  puts "Owned by " + owner.name[:first].to_s + " " + owner.name[:last] + "\n\n"
-end
-
-# interfaces
-
-# bank_of_cat_register = Bank::Register.new # Register holds account IDs for all accounts in bank
+# stored_accounts = Bank::Account.all
 #
-# puts "WELCOME TO THE BANK OF CAT"
-# puts "\n"
-# puts "Here, you can create an account."
-# puts "You will be prompted for various pieces of info to create your account."
-# puts "\n"
-#
-# first = ""
-#
-# while (true)
-#
-#   print "Please enter your first name: "
-#   first = gets.chomp.strip
-#
-#   if first == "" || first == " "
-#     puts "Please enter a valid name."
-#   else
-#     break
-#   end
-#
+# stored_accounts.each do |account|
+#   puts account
+#   owner = Bank::Owner.find(account.owners[0])
+#   puts "Owned by " + owner.name[:first].to_s + " " + owner.name[:last] + "\n\n"
 # end
-#
-# print "Please enter your middle name: "
-#
-# middle = gets.chomp.strip
-#
-# last = ""
-#
-# while (true)
-#
-#   print "Please enter your last name: "
-#   last = gets.chomp.strip
-#
-#   if last == "" || last == " "
-#     puts "Please enter a valid name."
-#   else
-#     break
-#   end
-#
-# end
-#
-# street1 = ""
-#
-# while (true)
-#
-#   print "Please enter your street address (line 1): "
-#   street1 = gets.chomp.strip
-#
-#   if street1 == "" || street1 == " "
-#     puts "Please enter a valid street address. Example: 123 Pleasant Dr."
-#   else
-#     break
-#   end
-#
-# end
-#
-# print "Please enter your street address (line 2, if needed): "
-#
-# street2 = gets.chomp.strip
-#
-# city = ""
-#
-# while (true)
-#
-#   print "Please enter your city: "
-#   city = gets.chomp.strip
-#
-#   if city == "" || city == " "
-#     puts "Please enter a valid street address. Example: 123 Pleasant Dr."
-#   else
-#     break
-#   end
-#
-# end
-#
-# state = ""
-#
-# while (true)
-#
-#   print "Please enter your state or province: "
-#   state = gets.chomp.strip
-#
-#   if state == "" || state == " "
-#     puts "Please enter a valid state. Example: WA"
-#   else
-#     break
-#   end
-#
-# end
-#
-# country = ""
-#
-# while (true)
-#
-#   print "Please enter your country: "
-#   country = gets.chomp.strip
-#
-#   if country == "" || country == " "
-#     puts "Please enter a valid country. Example: USA"
-#   else
-#     break
-#   end
-#
-# end
-#
-# zip = ""
-#
-# while (true)
-#
-#   print "Please enter your five-digit zip code: "
-#   zip = gets.chomp.strip
-#
-#   begin
-#
-#     Integer(zip)
-#
-#     if zip.length == 5
-#       break
-#     else
-#       puts "Please enter a valid 5-digit zip code. Example: 98006"
-#     end
-#
-#   rescue ArgumentError
-#     puts "Please enter a valid 5-digit zip code. Example: 98006"
-#   end
-#
-# end
-#
-# while (true)
-#
-#   print "Please enter your birthdate (MM-DD-YYYY): "
-#
-#   full_date = gets.chomp.strip.split("-")
-#   month = full_date[0]
-#   day = full_date[1]
-#   year = full_date[2]
-#
-#   begin
-#
-#     Time.new(year, month, day)
-#     break
-#
-#   rescue ArgumentError, TypeError
-#
-#     puts "Sorry, I couldn't parse that date. Please try again! Example: 01-16-1986"
-#
-#   end
-#
-# end
-#
-#
-# user = Bank::Owner.new({name: {first: first, middle: middle, last: last}, address: {street1: street1, street2: street2, city: city, state: state, country: country, zip: zip}, birthdate: Time.new(year, month, day)})
-#
-# #puts user
-#
-# account_number = nil
-#
-# while (true)
-#
-#   account_number = Random.rand(1..100000000)
-#
-#   if bank_of_cat_register.include?(account_number) == false
-#     break
-#   end
-#
-# end
-#
-# initial_deposit = 0.0
-#
-# while (true)
-#
-#   print "Please enter the amount you would initially like to deposit: $"
-#
-#   begin
-#
-#     initial_deposit = Float(gets.chomp.strip)
-#     my_account = Bank::Account.new(account_number, initial_deposit, user)
-#     break
-#
-#   rescue ArgumentError
-#
-#     puts "Please enter a valid, non-negative number as your initial deposit."
-#
-#   end
-#
-# end
-#
-# puts "\nThank you for activating your new account with BANK OF CAT!"
-# puts "Your account information is:\n\n"
-#
-# puts "Owner: " + my_account.list_owners.to_s
-#
-# puts "Balance: $%.2f" % my_account.balance
-#
-# puts "Account ID: " + my_account.id.to_s
-#
-# puts "\n"
-#
-# while (true)
-#
-#   puts "What would you like to do next?"
-#   puts "Make a deposit -- enter 1"
-#   puts "Make a withdrawal -- enter 2"
-#   puts "Check balance -- enter 3"
-#   puts "Quit -- enter Q"
-#   print "Choice: "
-#
-#   choice = gets.chomp.strip.downcase
-#
-#   case choice
-#
-#   when "1"
-#     begin
-#       print "How much would you like to deposit? $"
-#       deposit_amount = Float(gets.chomp.strip)
-#       puts "Thank you! Your new balance is: $%.2f" % my_account.deposit(deposit_amount)
-#     rescue ArgumentError
-#       puts "Sorry, I didn't get that! Please try again."
-#     end
-#   when "2"
-#     print "How much would you like to withdraw? $"
-#     withdrawal_amount = Float(gets.chomp.strip)
-#     puts "Your balance is: $%.2f" % my_account.withdraw(withdrawal_amount)
-#   when "3"
-#     puts "Your balance is: $%.2f" % my_account.balance
-#   when "q"
-#     puts "Goodbye! Thank you for banking with BANK OF CAT!"
-#     exit
-#   else
-#     puts "Sorry, I didn't get that, please try again!"
-#   end
-#
-# end
-
-
-
-
-
-#Testing
-
-# bucky_customer = Bank::Owner.new({name: {first: "Bucky", middle: "the", last: "Cat"}, address: {street1: "123 Oak Grove", street2: "Apt. 4H", city: "Anytown", state: "WA", country: "United States", zip: "00000"}, birthdate: Time.new(2005, 10, 31)})
-# puts bucky_customer.name[:first]
-# puts bucky_customer.address[:street2]
-#
-# puts bucky_customer
-
-# my_account = Bank::Account.new("124023053", 235.27, bucky_customer)
-#
-# puts "Balance is: $#{my_account.balance}"
-#
-# my_withdrawal = 250.0
-#
-# puts "Withdrew $#{my_withdrawal}. New balance is $#{my_account.withdraw(my_withdrawal)}."
-#
-# my_deposit = 100.0
-#
-# puts "Deposited $#{my_deposit}. New balance is $#{my_account.deposit(my_deposit)}."
-#
-# #puts "Owner of this account is #{my_account.owner.name[:first]} #{my_account.owner.name[:middle]} #{my_account.owner.name[:last]}"
-#
-# satchel = Bank::Owner.new({name: {first: "Satchel", middle: "the", last: "Dog"}, address: {street1: "123 Oak Grove", street2: "Apt. 4H", city: "Anytown", state: "WA", country: "United States", zip: "00000"}, birthdate: Time.new(2005, 10, 31)})
-#
-# my_account.add_owner(satchel)
-#
-# counter = 1
-#
-# my_account.owners.each do |owner|
-#   puts "Owner #{counter} of this account: #{owner.name[:first]} #{owner.name[:middle]} #{owner.name[:last]}"
-#   counter += 1
-# end
-#
-# account2 = Bank::Account.new("124113053", 100.35)
-#
-# rob = Bank::Owner.new({name: {first: "Rob", middle: "the", last: "Human"}, address: {street1: "123 Oak Grove", street2: "Apt. 4H", city: "Anytown", state: "WA", country: "United States", zip: "00000"}, birthdate: Time.new(2005, 10, 31)})
-#
-# puts account2.list_owners + "\n\n"
-#
-# account2.add_owner(rob)
-#
-# puts account2.list_owners + "\n\n"
-#
-# account2.add_owner(satchel)
-#
-# puts account2.list_owners + "\n\n"
-#
-# account2.add_owner(bucky_customer)
-#
-# puts account2.list_owners + "\n\n"
