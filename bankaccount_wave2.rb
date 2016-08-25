@@ -257,3 +257,138 @@ Bank::AccountLinker.read_account_owner_associations("./support/account_owners.cs
 #   owner = Bank::Owner.find(account.owners[0])
 #   puts "Owned by " + owner.name[:first].to_s + " " + owner.name[:last] + "\n\n"
 # end
+
+
+puts "WELCOME TO BANK OF CAT"
+puts "\n"
+
+first = ""
+
+while (true)
+
+  print "Please enter your banking ID: "
+  my_id = gets.chomp.strip
+
+  begin
+    owner = Bank::Owner.find(Integer(my_id))
+
+    if owner == nil
+      puts "Sorry, that ID is not in our system. Please try again!"
+    else
+      puts "Welcome, #{owner.name[:first]} #{owner.name[:last]}!"
+
+      my_account = nil
+
+      if owner.account_IDs.length == 1
+
+        my_account_ID = owner.account_IDs[0]
+        my_account = Bank::Account.find(my_account_ID)
+
+      else
+
+        found = false
+
+        while (!found)
+
+          puts "Which account would you like to access?"
+
+          owner.account_IDs.each do |id_num|
+            puts "#{id_num}"
+          end
+
+          print "Please enter the number of the desired account: "
+          input = gets.chomp.strip
+
+          begin
+            if owner.account_IDs.include?(Integer(input))
+              my_account = Bank::Account.find(Integer(input))
+              found = true
+            else
+              puts "Sorry, I didn't get that, please try again!"
+            end
+          rescue ArgumentError
+            puts "Sorry, I didn't get that, please try again!"
+          end
+
+        end
+
+      end
+
+      while (true)
+
+        puts "\nWhat would you like to do next?"
+        puts "Make a deposit -- enter 1"
+        puts "Make a withdrawal -- enter 2"
+        puts "Check balance -- enter 3"
+        puts "Quit -- enter Q"
+        print "Choice: "
+
+        choice = gets.chomp.strip.downcase
+
+        case choice
+
+        when "1"
+          begin
+            print "How much would you like to deposit? $"
+            deposit_amount = Float(gets.chomp.strip)
+            puts "Thank you! Your new balance is: $%.2f" % my_account.deposit(deposit_amount)
+          rescue ArgumentError
+            puts "Sorry, I didn't get that! Please try again."
+          end
+        when "2"
+          print "How much would you like to withdraw? $"
+          withdrawal_amount = Float(gets.chomp.strip)
+          puts "Your balance is: $%.2f" % my_account.withdraw(withdrawal_amount)
+        when "3"
+          puts "Your balance is: $%.2f" % my_account.balance
+        when "q"
+          puts "Goodbye! Thank you for banking with BANK OF CAT!"
+          exit
+        else
+          puts "Sorry, I didn't get that, please try again!"
+        end
+
+      end
+
+    end
+  rescue ArgumentError
+    puts "Sorry, I didn't get that. Please try again!"
+  end
+
+end
+
+# while (true)
+#
+#   puts "What would you like to do next?"
+#   puts "Make a deposit -- enter 1"
+#   puts "Make a withdrawal -- enter 2"
+#   puts "Check balance -- enter 3"
+#   puts "Quit -- enter Q"
+#   print "Choice: "
+#
+#   choice = gets.chomp.strip.downcase
+#
+#   case choice
+#
+#   when "1"
+#     begin
+#       print "How much would you like to deposit? $"
+#       deposit_amount = Float(gets.chomp.strip)
+#       puts "Thank you! Your new balance is: $%.2f" % my_account.deposit(deposit_amount)
+#     rescue ArgumentError
+#       puts "Sorry, I didn't get that! Please try again."
+#     end
+#   when "2"
+#     print "How much would you like to withdraw? $"
+#     withdrawal_amount = Float(gets.chomp.strip)
+#     puts "Your balance is: $%.2f" % my_account.withdraw(withdrawal_amount)
+#   when "3"
+#     puts "Your balance is: $%.2f" % my_account.balance
+#   when "q"
+#     puts "Goodbye! Thank you for banking with BANK OF CAT!"
+#     exit
+#   else
+#     puts "Sorry, I didn't get that, please try again!"
+#   end
+#
+# end
