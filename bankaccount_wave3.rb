@@ -2,7 +2,7 @@
 #
 # Represents a bank account. Reads in account data, owner data, and owner-account
 # relationships from CSV files. Please note that this version utilizes an extended
-# account CSV file ("account_types.csv") that includes the type of each account -
+# account CSV file ("accounts_types.csv") that includes the type of each account -
 # it will not run correctly with the original "accounts.csv" file. Accounts may be
 # SavingsAccount, CheckingAccount, or MoneyMarketAccount, each of which inherits
 # from Account.
